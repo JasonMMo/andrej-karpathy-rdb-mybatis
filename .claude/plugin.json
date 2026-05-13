@@ -1,0 +1,8 @@
+{
+  "name": "andrej-karpathy-rdb-mybatis",
+  "version": "0.1.0",
+  "description": "Stage 3 — Blueprint + DDL → MyBatis/nexacro uiadapter backend codegen",
+  "author": "business-fullstack-creater",
+  "commands": [".claude/commands"],
+  "skills": [".claude/skills"]
+}
