@@ -5,19 +5,19 @@ entities:
     table: TB_CUSTOMER
     schema: public
     columns:
-      - { name: customer_id, type: varchar(36), pk: true,  null: false }
-      - { name: name,        type: varchar(100), null: true }
-      - { name: email,       type: varchar(200), null: true }
-      - { name: status,      type: varchar(20),  null: true }
+      - { name: customer_id, type: varchar(36), pk: true,  nullable: false }
+      - { name: name,        type: varchar(100), nullable: true }
+      - { name: email,       type: varchar(200), nullable: true }
+      - { name: status,      type: varchar(20),  nullable: true }
     indexes:
       - { name: ix_tb_customer_email, columns: [email], unique: false }
   - name: address
     table: TB_ADDRESS
     schema: public
     columns:
-      - { name: address_id,  type: varchar(36), pk: true,  null: false }
-      - { name: customer_id, type: varchar(36), null: false }
-      - { name: line1,       type: varchar(200), null: true }
+      - { name: address_id,  type: varchar(36), pk: true,  nullable: false }
+      - { name: customer_id, type: varchar(36), nullable: false }
+      - { name: line1,       type: varchar(200), nullable: true }
 relations:
   - { from: address, to: customer, cardinality: "N:1", fk: customer_id, on_delete: cascade }
 business_rules: []
