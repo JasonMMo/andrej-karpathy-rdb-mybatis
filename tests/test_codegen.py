@@ -50,3 +50,18 @@ def test_service_impl_has_three_branches(tmp_path):
     assert "insert_customer_map" in impl
     assert "update_customer_map" in impl
     assert "delete_customer_map" in impl
+
+
+from toposort import topo_sort
+
+
+def test_topo_sort_fk_aware():
+    entities = [
+        {"name": "address", "table": "TB_ADDRESS", "columns": [{"name": "address_id", "pk": True}]},
+        {"name": "customer", "table": "TB_CUSTOMER", "columns": [{"name": "customer_id", "pk": True}]},
+    ]
+    relations = [{"from": "address", "to": "customer", "fk": "customer_id"}]
+    ordered = topo_sort(entities, relations)
+    names = [e["name"] for e in ordered]
+    # parent (customer) must come before child (address)
+    assert names.index("customer") < names.index("address")
