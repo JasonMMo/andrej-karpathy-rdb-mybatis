@@ -1,0 +1,42 @@
+package {{ base_package }}.service.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.nexacro.java.xapi.data.DataSet;
+import {{ base_package }}.spring.core.data.DataSetRowTypeAccessor;
+import {{ base_package }}.mapper.{{ pascal }}Mapper;
+import {{ base_package }}.service.{{ pascal }}Service;
+
+@Service("{{ camel }}Service")
+public class {{ pascal }}ServiceImpl implements {{ pascal }}Service {
+
+    @Autowired
+    private SqlSessionTemplate sqlSession;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> select_{{ entity_name }}_datalist_map(Map<String, String> searchMap) {
+        {{ pascal }}Mapper mapper = sqlSession.getMapper({{ pascal }}Mapper.class);
+        return mapper.select_{{ entity_name }}_datalist_map(searchMap);
+    }
+
+    @Override
+    @Transactional
+    public void save_{{ entity_name }}_datalist_map(List<Map<String, Object>> dataList) {
+        {{ pascal }}Mapper mapper = sqlSession.getMapper({{ pascal }}Mapper.class);
+        for (Map<String, Object> row : dataList) {
+            int rowType = Integer.parseInt(String.valueOf(row.get(DataSetRowTypeAccessor.NAME)));
+{% for b in save_branches %}
+            {% if loop.first %}if{% else %}else if{% endif %} (rowType == {{ b.row_type_const }}) {
+                mapper.{{ b.mapper_method }}(row);
+            }
+{% endfor %}
+        }
+    }
+}
