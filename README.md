@@ -25,7 +25,13 @@ Generates a complete MyBatis + nexacro uiadapter `backend/` from a Stage 1 `_blu
 ```
 
 Optional:
-- `--package com.nexacro.uiadapter` (default)
+- `--package com.nexacro.uiadapter` (default) — project base package; the
+  NexacroN library prefix (`com.nexacro.uiadapter.jakarta.core.*`) is fixed
+  and **not** affected by this flag.
+- `--table-prefix TB_` (default) — expected table prefix; mismatches emit a
+  warning in the report (exit 0 unchanged).
+- `--strict-prefix` — promote the prefix mismatch from warning to hard fail
+  (exit 1). Use this in CI when the blueprint is expected to be conformant.
 - `--skip-compile` — skip R006 javac check
 - `--dry-run` — write report only, no code
 
