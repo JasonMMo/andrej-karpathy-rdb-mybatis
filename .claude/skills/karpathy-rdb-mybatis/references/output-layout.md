@@ -14,6 +14,7 @@ src/main/resources/
 ├── data.sql                (if seed present)
 └── mybatis/mapper/<Entity>Mapper.xml
 mybatis-report.md
+endpoints.json              (project root — Stage 4 input contract, v0.1.4+)
 ```
 
 Stage 3 does NOT touch `pom.xml`, `application.yml`, `Application.java`, or `config/` — those come from `nexacro-fullstack-starter`.
