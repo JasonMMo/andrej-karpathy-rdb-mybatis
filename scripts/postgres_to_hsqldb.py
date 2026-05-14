@@ -18,17 +18,35 @@ _TYPE_REWRITES = [
 
 _DEFAULT_UUID = re.compile(r"\s*DEFAULT\s+gen_random_uuid\(\)", re.I)
 
+# Single-quoted SQL string literal, with '' as embedded escape.
+_LITERAL = re.compile(r"'(?:[^']|'')*'")
+
+
+def _apply_outside_literals(sql, fn):
+    """Apply fn(segment) to every region of `sql` that lies outside a SQL
+    string literal. Quoted literals are passed through unchanged so identifiers
+    like 'public.X' inside seed data are not corrupted."""
+    parts = []
+    last = 0
+    for m in _LITERAL.finditer(sql):
+        parts.append(fn(sql[last:m.start()]))
+        parts.append(m.group(0))
+        last = m.end()
+    parts.append(fn(sql[last:]))
+    return "".join(parts)
+
 
 def _strip_schema(sql: str) -> str:
     sql = _SCHEMA_LINE.sub("", sql)
-    return _SCHEMA_QUALIFIER.sub("", sql)
+    return _apply_outside_literals(sql, lambda s: _SCHEMA_QUALIFIER.sub("", s))
 
 
 def _rewrite_types(sql: str) -> str:
-    for pat, repl in _TYPE_REWRITES:
-        sql = pat.sub(repl, sql)
-    sql = _DEFAULT_UUID.sub("", sql)
-    return sql
+    def rewrite(seg: str) -> str:
+        for pat, repl in _TYPE_REWRITES:
+            seg = pat.sub(repl, seg)
+        return _DEFAULT_UUID.sub("", seg)
+    return _apply_outside_literals(sql, rewrite)
 
 
 def _section(title: str, body: str) -> str:
