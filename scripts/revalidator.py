@@ -2,6 +2,7 @@ import pathlib
 import re
 import subprocess
 import os
+from dataclasses import dataclass
 
 
 class RevalidationError(Exception):
@@ -50,3 +51,38 @@ def lint_mapper_xmls(out_root: pathlib.Path) -> None:
         missing_in_xml = methods - ids
         if missing_in_xml:
             raise RevalidationError(f"{xml.name}: method(s) not in xml: {sorted(missing_in_xml)}")
+
+
+@dataclass
+class JavacResult:
+    ok: bool = True
+    skipped: bool = False
+    message: str = ""
+    stderr: str = ""
+
+
+def javac_check(out_root: pathlib.Path) -> JavacResult:
+    libs_env = os.environ.get("NEXACRO_LIBS_DIR")
+    if not libs_env:
+        return JavacResult(ok=True, skipped=True,
+                           message="NEXACRO_LIBS_DIR not set; R006 javac check skipped")
+    libs_dir = pathlib.Path(libs_env)
+    if not libs_dir.exists():
+        return JavacResult(ok=True, skipped=True,
+                           message=f"NEXACRO_LIBS_DIR does not exist: {libs_dir}")
+    java_files = list(_java_root(out_root).rglob("*.java"))
+    if not java_files:
+        return JavacResult(ok=True, skipped=True, message="no .java files to compile")
+    jars = list(libs_dir.glob("*.jar"))
+    cp_sep = ";" if os.name == "nt" else ":"
+    cp = cp_sep.join(str(j) for j in jars) if jars else ""
+    build_dir = pathlib.Path(out_root) / ".build_check"
+    build_dir.mkdir(parents=True, exist_ok=True)
+    cmd = ["javac", "-d", str(build_dir)]
+    if cp:
+        cmd += ["-cp", cp]
+    cmd += [str(f) for f in java_files]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    return JavacResult(ok=(proc.returncode == 0), skipped=False,
+                       message=("javac ok" if proc.returncode == 0 else "javac failed"),
+                       stderr=proc.stderr)
