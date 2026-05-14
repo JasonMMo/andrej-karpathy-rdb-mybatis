@@ -61,6 +61,24 @@ def test_compile_exits_1_and_reports_r001_fail_when_blueprint_missing(tmp_path):
     assert "R002: N/A" in report
 
 
+def test_compile_strict_prefix_fails_on_violation(tmp_path):
+    proj = _project_dir(tmp_path)
+    # default prefix is TB_; force a violation by changing --table-prefix
+    cp = _run_compile(proj, "compile", "--skip-compile", "--strict-prefix",
+                      "--table-prefix", "ZZ_")
+    assert cp.returncode == 1
+    assert "table-prefix" in (cp.stdout + cp.stderr)
+
+
+def test_compile_warns_on_prefix_violation_without_strict(tmp_path):
+    proj = _project_dir(tmp_path)
+    cp = _run_compile(proj, "compile", "--skip-compile",
+                      "--table-prefix", "ZZ_")
+    assert cp.returncode == 0, cp.stderr
+    report = (proj / "backend" / "mybatis-report.md").read_text(encoding="utf-8")
+    assert "warning" in report and "table-prefix" in report
+
+
 def test_compile_dry_run_writes_no_code(tmp_path):
     proj = _project_dir(tmp_path)
     cp = _run_compile(proj, "compile", "--dry-run")
