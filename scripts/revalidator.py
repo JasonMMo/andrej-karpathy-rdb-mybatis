@@ -28,7 +28,12 @@ def _xml_root(out_root: pathlib.Path) -> pathlib.Path:
 
 def _read_methods_from_iface(iface_path: pathlib.Path) -> list:
     txt = iface_path.read_text(encoding="utf-8")
-    body = txt[txt.index("{") + 1 : txt.rindex("}")]
+    try:
+        body = txt[txt.index("{") + 1 : txt.rindex("}")]
+    except ValueError as e:
+        raise RevalidationError(
+            f"{iface_path.name}: malformed interface (missing braces): {e}"
+        ) from e
     return [m.group(1) for m in _IFACE_METHOD.finditer(body)]
 
 
