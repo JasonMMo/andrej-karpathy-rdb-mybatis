@@ -1,3 +1,6 @@
+import sys
+
+
 def topo_sort(entities: list, relations: list) -> list:
     by_name = {e["name"]: e for e in entities}
     indeg = {n: 0 for n in by_name}
@@ -17,6 +20,13 @@ def topo_sort(entities: list, relations: list) -> list:
             indeg[m] -= 1
             if indeg[m] == 0:
                 order.append(m)
-    # any cycle remainder: append in declaration order
-    remaining = [e for e in entities if e["name"] not in {x["name"] for x in out}]
+    # any cycle remainder: warn and append in declaration order
+    settled = {x["name"] for x in out}
+    remaining = [e for e in entities if e["name"] not in settled]
+    if remaining:
+        print(
+            f"[toposort] WARNING: FK cycle detected; appending in declaration "
+            f"order: {[e['name'] for e in remaining]}",
+            file=sys.stderr,
+        )
     return out + remaining
