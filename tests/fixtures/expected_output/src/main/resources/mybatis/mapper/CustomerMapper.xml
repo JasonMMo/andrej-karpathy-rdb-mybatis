@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nexacro.uiadapter.mapper.CustomerMapper">
+
+  <select id="select_customer_datalist_map" parameterType="java.util.Map"
+          resultType="java.util.Map">
+    SELECT CUSTOMER_ID, NAME, EMAIL, STATUS
+      FROM TB_CUSTOMER
+     WHERE 1=1
+
+    <if test="CUSTOMER_ID != null and CUSTOMER_ID != ''"> AND CUSTOMER_ID = #{CUSTOMER_ID}</if>
+
+    <if test="NAME != null and NAME != ''"> AND NAME = #{NAME}</if>
+
+    <if test="EMAIL != null and EMAIL != ''"> AND EMAIL = #{EMAIL}</if>
+
+    <if test="STATUS != null and STATUS != ''"> AND STATUS = #{STATUS}</if>
+
+  </select>
+
+  <insert id="insert_customer_map" parameterType="java.util.Map">
+    INSERT INTO TB_CUSTOMER (CUSTOMER_ID, NAME, EMAIL, STATUS)
+    VALUES (#{CUSTOMER_ID}, #{NAME}, #{EMAIL}, #{STATUS})
+  </insert>
+
+  <update id="update_customer_map" parameterType="java.util.Map">
+    UPDATE TB_CUSTOMER
+       SET NAME = #{NAME},
+           EMAIL = #{EMAIL},
+           STATUS = #{STATUS}
+     WHERE CUSTOMER_ID = #{CUSTOMER_ID}
+  </update>
+
+  <delete id="delete_customer_map" parameterType="java.util.Map">
+    DELETE FROM TB_CUSTOMER WHERE CUSTOMER_ID = #{CUSTOMER_ID}
+  </delete>
+
+</mapper>
