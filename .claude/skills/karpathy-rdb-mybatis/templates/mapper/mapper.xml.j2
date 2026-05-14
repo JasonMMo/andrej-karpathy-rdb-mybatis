@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="{{ mapper_fqcn }}">
+
+  <select id="select_{{ entity_name }}_datalist_map" parameterType="java.util.Map"
+          resultType="java.util.Map">
+    SELECT {{ mapper_columns.all_upper | join(", ") }}
+      FROM {{ table }}
+     WHERE 1=1
+{% for pred in search_predicates %}
+    {{ pred }}
+{% endfor %}
+  </select>
+
+  <insert id="insert_{{ entity_name }}_map" parameterType="java.util.Map">
+    INSERT INTO {{ table }} ({{ mapper_columns.all_upper | join(", ") }})
+    VALUES ({% for c in mapper_columns.all_upper %}#{{ '{' }}{{ c }}{{ '}' }}{% if not loop.last %}, {% endif %}{% endfor %})
+  </insert>
+
+  <update id="update_{{ entity_name }}_map" parameterType="java.util.Map">
+    UPDATE {{ table }}
+       SET {% for c in mapper_columns.non_pk_upper %}{{ c }} = #{{ '{' }}{{ c }}{{ '}' }}{% if not loop.last %},
+           {% endif %}{% endfor %}
+     WHERE {% for c in mapper_columns.pk_upper %}{{ c }} = #{{ '{' }}{{ c }}{{ '}' }}{% if not loop.last %} AND {% endif %}{% endfor %}
+  </update>
+
+  <delete id="delete_{{ entity_name }}_map" parameterType="java.util.Map">
+    DELETE FROM {{ table }} WHERE {% for c in mapper_columns.pk_upper %}{{ c }} = #{{ '{' }}{{ c }}{{ '}' }}{% if not loop.last %} AND {% endif %}{% endfor %}
+  </delete>
+
+</mapper>
