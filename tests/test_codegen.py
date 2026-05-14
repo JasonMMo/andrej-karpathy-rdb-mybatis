@@ -40,6 +40,26 @@ def test_mapper_xml_namespace_matches_interface(tmp_path):
     assert 'namespace="com.nexacro.uiadapter.mapper.CustomerMapper"' in xml
 
 
+def test_nexacro_lib_prefix_independent_of_base_package(tmp_path):
+    """When --package is a custom value, NexacroN library imports must still
+    point at com.nexacro.uiadapter.jakarta.core (the fixed library prefix)."""
+    out = tmp_path / "backend"
+    render_entity_files(out, ENTITY, base_package="com.mycompany.app")
+    java_root = out / "src/main/java/com/mycompany/app"
+    ctrl = (java_root / "controller/CustomerController.java").read_text(encoding="utf-8")
+    impl = (java_root / "service/impl/CustomerServiceImpl.java").read_text(encoding="utf-8")
+    domain = (java_root / "domain/Customer.java").read_text(encoding="utf-8")
+    # library types stay at fixed nexacro prefix
+    assert "import com.nexacro.uiadapter.jakarta.core.data.NexacroResult;" in ctrl
+    assert "import com.nexacro.uiadapter.jakarta.core.NexacroException;" in ctrl
+    assert "import com.nexacro.uiadapter.jakarta.core.data.DataSetRowTypeAccessor;" in impl
+    assert "import com.nexacro.uiadapter.jakarta.core.data.NexacroBase;" in domain
+    # project types use the custom base package
+    assert "package com.mycompany.app.controller;" in ctrl
+    assert "import com.mycompany.app.service.CustomerService;" in ctrl
+    assert "import com.mycompany.app.mapper.CustomerMapper;" in impl
+
+
 def test_service_impl_has_three_branches(tmp_path):
     out = tmp_path / "backend"
     render_entity_files(out, ENTITY, base_package="com.nexacro.uiadapter")
@@ -82,6 +102,6 @@ def test_render_schema_sql_writes_to_resources(tmp_path):
     converted = convert_bundle(bundle)
     path = render_schema_sql(tmp_path / "backend", converted)
     text = path.read_text(encoding="utf-8")
-    assert "schema.sql (HSQLDB)" in text
+    assert "Generated from db/migrations" in text
     assert "CREATE TABLE TB_X" in text
     assert "CREATE SCHEMA" not in text
