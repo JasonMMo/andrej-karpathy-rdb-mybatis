@@ -37,6 +37,28 @@ def test_strips_gen_random_uuid_default():
     assert "gen_random_uuid" not in out
 
 
+def test_preserves_public_qualifier_inside_string_literals():
+    """A seed/INSERT row carrying a literal value like 'public.docs' must not
+    have its quoted content rewritten — schema stripping is for identifiers
+    only, not for string literals."""
+    b = DDLBundle(schema_sql="", indexes_sql="", constraints_sql="",
+                  tables_sql="INSERT INTO public.tag (name) VALUES ('public.docs');")
+    out = convert_bundle(b)
+    # identifier got stripped
+    assert "INSERT INTO tag" in out
+    # literal preserved verbatim
+    assert "'public.docs'" in out
+
+
+def test_preserves_type_keywords_inside_string_literals():
+    """Type rewrites must not corrupt quoted literals that happen to contain
+    keywords like TEXT or NUMERIC."""
+    b = DDLBundle(schema_sql="", indexes_sql="", constraints_sql="",
+                  tables_sql="INSERT INTO note (kind) VALUES ('TEXT note');")
+    out = convert_bundle(b)
+    assert "'TEXT note'" in out
+
+
 def test_preserves_fk_and_index_sections():
     b = DDLBundle(
         schema_sql="CREATE SCHEMA IF NOT EXISTS public;",
