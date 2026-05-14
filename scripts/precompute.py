@@ -1,6 +1,8 @@
 from name_mapper import to_upper_snake, to_camel, to_pascal
 from column_classifier import classify
 
+NEXACRO_LIB_PREFIX = "com.nexacro.uiadapter"
+
 
 def gather_mapper_columns(entity: dict) -> dict:
     c = classify(entity)
@@ -73,6 +75,7 @@ def build_entity_context(entity: dict, base_package: str) -> dict:
         "camel": to_camel(name),
         "table": entity["table"],
         "base_package": base_package,
+        "lib_prefix": NEXACRO_LIB_PREFIX,
         "mapper_fqcn": f"{base_package}.mapper.{pascal}Mapper",
         "endpoint_base": f"/{name}",
         "mapper_columns": gather_mapper_columns(entity),
