@@ -1,0 +1,38 @@
+package {{ base_package }}.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import {{ base_package }}.jakarta.core.data.NexacroResult;
+import {{ base_package }}.jakarta.core.data.ParamDataSet;
+import {{ base_package }}.jakarta.core.NexacroException;
+import {{ base_package }}.service.{{ pascal }}Service;
+
+@Controller
+public class {{ pascal }}Controller {
+
+    @Autowired
+    private {{ pascal }}Service {{ camel }}Service;
+
+    @RequestMapping(value = "{{ endpoint_base }}/select_datalist_map.do")
+    public NexacroResult select_datalist_map(
+            @ParamDataSet(name = "dsSearch", required = false) Map<String, String> searchMap)
+            throws NexacroException {
+        List<Map<String, Object>> list = {{ camel }}Service.select_{{ entity_name }}_datalist_map(searchMap);
+        NexacroResult result = new NexacroResult();
+        result.addDataSet("output1", list);
+        return result;
+    }
+
+    @RequestMapping(value = "{{ endpoint_base }}/save_datalist_map.do")
+    public NexacroResult save_datalist_map(
+            @ParamDataSet(name = "dataList") List<Map<String, Object>> dataList)
+            throws NexacroException {
+        {{ camel }}Service.save_{{ entity_name }}_datalist_map(dataList);
+        return new NexacroResult();
+    }
+}
