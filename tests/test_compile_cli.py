@@ -1,0 +1,60 @@
+import os
+import pathlib
+import subprocess
+import sys
+import shutil
+
+
+PLUGIN_ROOT = pathlib.Path(__file__).resolve().parent.parent
+FIXTURE_BP = PLUGIN_ROOT / "tests" / "fixtures" / "golden_blueprint"
+FIXTURE_DDL = PLUGIN_ROOT / "tests" / "fixtures" / "golden_ddl"
+
+
+def _project_dir(tmp_path: pathlib.Path) -> pathlib.Path:
+    wiki = tmp_path / "wiki"
+    wiki.mkdir()
+    shutil.copy(FIXTURE_BP / "_blueprint.yaml", wiki / "_blueprint.yaml")
+    db = tmp_path / "db" / "migrations"
+    db.mkdir(parents=True)
+    for f in FIXTURE_DDL.glob("V0*.sql"):
+        shutil.copy(f, db / f.name)
+    return tmp_path
+
+
+def _run_compile(cwd: pathlib.Path, *args, env_extra=None) -> subprocess.CompletedProcess:
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(PLUGIN_ROOT / "scripts")
+    if env_extra:
+        env.update(env_extra)
+    cmd = [sys.executable, str(PLUGIN_ROOT / "scripts" / "compile.py"), *args]
+    return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, env=env)
+
+
+def test_compile_success_skip_javac(tmp_path):
+    proj = _project_dir(tmp_path)
+    cp = _run_compile(proj, "compile", "--skip-compile")
+    assert cp.returncode == 0, cp.stderr
+    out = proj / "backend"
+    assert (out / "src/main/java/com/nexacro/uiadapter/controller/CustomerController.java").exists()
+    assert (out / "src/main/resources/schema.sql").exists()
+    assert (out / "mybatis-report.md").exists()
+
+
+def test_compile_exits_1_on_bad_blueprint(tmp_path):
+    proj = _project_dir(tmp_path)
+    (proj / "wiki" / "_blueprint.yaml").write_text(
+        "version: 1\nproject: x\nentities: []\nrelations: []\nbusiness_rules: []\nvalidation: {passed: false}\n",
+        encoding="utf-8",
+    )
+    cp = _run_compile(proj, "compile", "--skip-compile")
+    assert cp.returncode == 1
+    assert "validation.passed" in (cp.stdout + cp.stderr)
+
+
+def test_compile_dry_run_writes_no_code(tmp_path):
+    proj = _project_dir(tmp_path)
+    cp = _run_compile(proj, "compile", "--dry-run")
+    assert cp.returncode == 0
+    out = proj / "backend"
+    assert (out / "mybatis-report.md").exists()
+    assert not (out / "src/main/java/com/nexacro/uiadapter/controller/CustomerController.java").exists()
