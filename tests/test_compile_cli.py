@@ -51,6 +51,16 @@ def test_compile_exits_1_on_bad_blueprint(tmp_path):
     assert "validation.passed" in (cp.stdout + cp.stderr)
 
 
+def test_compile_exits_1_and_reports_r001_fail_when_blueprint_missing(tmp_path):
+    proj = _project_dir(tmp_path)
+    (proj / "wiki" / "_blueprint.yaml").unlink()
+    cp = _run_compile(proj, "compile", "--skip-compile")
+    assert cp.returncode == 1
+    report = (proj / "backend" / "mybatis-report.md").read_text(encoding="utf-8")
+    assert "R001: FAIL" in report
+    assert "R002: N/A" in report
+
+
 def test_compile_dry_run_writes_no_code(tmp_path):
     proj = _project_dir(tmp_path)
     cp = _run_compile(proj, "compile", "--dry-run")
