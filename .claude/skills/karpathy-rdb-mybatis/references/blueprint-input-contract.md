@@ -13,8 +13,8 @@ Source: `wiki/_blueprint.yaml` produced by `/karpathy-rdb compile`.
 ## Entity column shape
 ```yaml
 columns:
-  - { name: customer_id, type: varchar(36), pk: true, null: false }
-  - { name: name,        type: varchar(100), null: true }
+  - { name: customer_id, type: varchar(36), pk: true, nullable: false }
+  - { name: name,        type: varchar(100), nullable: true }
 ```
 
 ## Hard rejects
