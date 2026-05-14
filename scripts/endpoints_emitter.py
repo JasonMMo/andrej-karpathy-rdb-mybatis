@@ -14,13 +14,13 @@ def build_endpoints_payload(entities, context_path="/uiadapter"):
                 {
                     "method": "select_datalist_map",
                     "http_path": f"{base}/select_datalist_map.do",
-                    "input":  {"dsSearch": "param-dataset"},
+                    "input": {"dsSearch": "param-dataset"},
                     "output": {"output1": "list-dataset"},
                 },
                 {
                     "method": "save_datalist_map",
                     "http_path": f"{base}/save_datalist_map.do",
-                    "input":  {"dataList": "row-dispatch"},
+                    "input": {"dataList": "row-dispatch"},
                     "output": {},
                 },
             ],
