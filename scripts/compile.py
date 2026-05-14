@@ -10,6 +10,7 @@ from postgres_to_hsqldb import convert_bundle, convert_seed_files
 from codegen import render_entity_files, render_schema_sql, render_data_sql
 from revalidator import lint_mapper_xmls, javac_check, RevalidationError
 from reporter import write_report, ReportInput
+from endpoints_emitter import build_endpoints_payload, write_endpoints_json
 
 
 def _parse_args(argv):
@@ -98,6 +99,9 @@ def main(argv=None):
         for e in sorted_entities:
             endpoints.append(f"/{e['name']}/select_datalist_map.do")
             endpoints.append(f"/{e['name']}/save_datalist_map.do")
+        endpoints_payload = build_endpoints_payload(sorted_entities, context_path="/uiadapter")
+        write_endpoints_json(out_root, endpoints_payload)
+        generated.append(str(out_root / "endpoints.json"))
         _emit_full_report(args, validation, generated, endpoints, exit_code=0, extra=extra + ["dry-run mode"])
         return 0
 
@@ -135,6 +139,9 @@ def main(argv=None):
             extra.append("javac stderr:\n" + jr.stderr)
             exit_code = max(exit_code, 2)
 
+    endpoints_payload = build_endpoints_payload(sorted_entities, context_path="/uiadapter")
+    write_endpoints_json(out_root, endpoints_payload)
+    generated.append(str(out_root / "endpoints.json"))
     _emit_full_report(args, validation, generated, endpoints, exit_code=exit_code, extra=extra,
                       project=bp.get("project", ""), entity_count=len(sorted_entities))
     return exit_code
