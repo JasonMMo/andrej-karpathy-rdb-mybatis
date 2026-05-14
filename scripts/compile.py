@@ -22,6 +22,8 @@ def _parse_args(argv):
     c.add_argument("--out",       default="backend")
     c.add_argument("--package",   default="com.nexacro.uiadapter")
     c.add_argument("--table-prefix", default="TB_")
+    c.add_argument("--strict-prefix", action="store_true",
+                   help="fail (exit 1) when any entity's table does not start with --table-prefix")
     c.add_argument("--skip-compile", action="store_true")
     c.add_argument("--dry-run",   action="store_true")
     return p.parse_args(argv)
@@ -75,9 +77,14 @@ def main(argv=None):
         _emit_partial_report(args, validation, exit_code=1, extra=[str(e)])
         return 1
 
-    prefix_warnings = _check_table_prefix(bp["entities"], args.table_prefix)
-    if prefix_warnings:
-        extra.append(f"table-prefix warning: {prefix_warnings} do not start with {args.table_prefix}")
+    prefix_violations = _check_table_prefix(bp["entities"], args.table_prefix)
+    if prefix_violations:
+        msg = f"table-prefix: {prefix_violations} do not start with {args.table_prefix}"
+        if args.strict_prefix:
+            print(f"[table-prefix] {msg}", file=sys.stderr)
+            _emit_partial_report(args, validation, exit_code=1, extra=[msg])
+            return 1
+        extra.append(f"warning: {msg}")
 
     sorted_entities = topo_sort(bp["entities"], bp.get("relations") or [])
 
