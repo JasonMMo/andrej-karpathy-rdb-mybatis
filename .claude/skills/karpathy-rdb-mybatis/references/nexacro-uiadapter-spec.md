@@ -4,10 +4,10 @@ References:
 - `spring boot 3.0기반-nexacroN-개발자가이드(v0.3).pdf` p.62–74
 - GitLab: `nexacron/spring-boot/jakarta/uiadapter-jakarta` `BoardController.java`, `BoardServiceImpl.java`
 
-## Mandatory imports (per layer)
-- Controller: `com.nexacro.uiadapter.spring.core.data.{NexacroResult, ParamDataSet}`, `com.nexacro.uiadapter.spring.core.NexacroException`
-- ServiceImpl: `com.nexacro.java.xapi.data.DataSet`, `com.nexacro.uiadapter.spring.core.data.DataSetRowTypeAccessor`, `org.mybatis.spring.SqlSessionTemplate`
-- Domain: `com.nexacro.uiadapter.spring.core.data.NexacroBase`
+## Mandatory imports (per layer) — JDK17 jakarta
+- Controller: `com.nexacro.uiadapter.jakarta.core.data.{NexacroResult, ParamDataSet}`, `com.nexacro.uiadapter.jakarta.core.NexacroException`
+- ServiceImpl: `com.nexacro.java.xapi.data.DataSet`, `com.nexacro.uiadapter.jakarta.core.data.DataSetRowTypeAccessor`, `org.mybatis.spring.SqlSessionTemplate`
+- Domain: `com.nexacro.uiadapter.jakarta.core.data.NexacroBase`
 
 ## Save dispatch (single endpoint)
 ```java
