@@ -1,7 +1,5 @@
 import json
 import pathlib
-import sys
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
 from endpoints_emitter import build_endpoints_payload, write_endpoints_json
 
@@ -32,3 +30,13 @@ def test_write_endpoints_json_round_trip(tmp_path):
     p = write_endpoints_json(tmp_path, payload)
     assert p == tmp_path / "endpoints.json"
     assert json.loads(p.read_text(encoding="utf-8")) == payload
+
+
+def test_build_endpoints_payload_empty_entities():
+    payload = build_endpoints_payload([], context_path="/uiadapter")
+    assert payload == {"version": 1, "context_path": "/uiadapter", "entities": []}
+
+
+def test_build_endpoints_payload_default_context_path():
+    payload = build_endpoints_payload([{"name": "x"}])
+    assert payload["context_path"] == "/uiadapter"
