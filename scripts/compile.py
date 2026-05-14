@@ -46,8 +46,12 @@ def main(argv=None):
         validation["R002"] = "PASS"
     except BlueprintError as e:
         msg = str(e)
-        validation["R001"] = "PASS" if "version" not in msg else "FAIL"
-        validation["R002"] = "FAIL" if "validation.passed" in msg else validation.get("R002", "N/A")
+        if "validation.passed" in msg:
+            validation["R001"] = "PASS"
+            validation["R002"] = "FAIL"
+        else:
+            validation["R001"] = "FAIL"
+            validation["R002"] = "N/A"
         print(f"[R001/R002] {msg}", file=sys.stderr)
         _emit_partial_report(args, validation, exit_code=1, extra=[msg])
         return 1
