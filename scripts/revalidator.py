@@ -1,8 +1,12 @@
 import pathlib
 import re
+import shutil
 import subprocess
 import os
 from dataclasses import dataclass
+
+
+JAVAC_TIMEOUT_SECONDS = 120
 
 
 class RevalidationError(Exception):
@@ -82,7 +86,18 @@ def javac_check(out_root: pathlib.Path) -> JavacResult:
     if cp:
         cmd += ["-cp", cp]
     cmd += [str(f) for f in java_files]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    return JavacResult(ok=(proc.returncode == 0), skipped=False,
-                       message=("javac ok" if proc.returncode == 0 else "javac failed"),
-                       stderr=proc.stderr)
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True,
+                              timeout=JAVAC_TIMEOUT_SECONDS)
+        result = JavacResult(
+            ok=(proc.returncode == 0), skipped=False,
+            message=("javac ok" if proc.returncode == 0 else "javac failed"),
+            stderr=proc.stderr,
+        )
+    except subprocess.TimeoutExpired as e:
+        result = JavacResult(ok=False, skipped=False,
+                             message="javac timeout",
+                             stderr=f"javac exceeded {JAVAC_TIMEOUT_SECONDS}s: {e}")
+    finally:
+        shutil.rmtree(build_dir, ignore_errors=True)
+    return result
