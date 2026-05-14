@@ -65,3 +65,23 @@ def test_topo_sort_fk_aware():
     names = [e["name"] for e in ordered]
     # parent (customer) must come before child (address)
     assert names.index("customer") < names.index("address")
+
+
+from codegen import render_schema_sql
+from ddl_loader import DDLBundle
+from postgres_to_hsqldb import convert_bundle
+
+
+def test_render_schema_sql_writes_to_resources(tmp_path):
+    bundle = DDLBundle(
+        schema_sql="CREATE SCHEMA IF NOT EXISTS public;",
+        tables_sql="CREATE TABLE public.TB_X (ID INT PRIMARY KEY);",
+        indexes_sql="",
+        constraints_sql="",
+    )
+    converted = convert_bundle(bundle)
+    path = render_schema_sql(tmp_path / "backend", converted)
+    text = path.read_text(encoding="utf-8")
+    assert "schema.sql (HSQLDB)" in text
+    assert "CREATE TABLE TB_X" in text
+    assert "CREATE SCHEMA" not in text
