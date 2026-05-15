@@ -1,0 +1,12 @@
+package {{ base_package }}.domain;
+
+public class {{ pascal }} {
+{% for f in fields %}
+    private {{ f.java_type }} {{ f.field }};
+{% endfor %}
+
+{% for f in fields %}
+    public {{ f.java_type }} {{ f.getter }}() { return {{ f.field }}; }
+    public void {{ f.setter }}({{ f.java_type }} v) { this.{{ f.field }} = v; }
+{% endfor %}
+}
