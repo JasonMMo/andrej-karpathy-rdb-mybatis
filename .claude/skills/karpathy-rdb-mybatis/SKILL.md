@@ -25,4 +25,9 @@ Stage 3 of the business-fullstack-creater pipeline.
 - Map-based search input, `List<Map<String,Object>>` output
 - HSQLDB runtime via `schema.sql` (Spring Boot bootstrap)
 
+## Lanes (v0.3+)
+
+- `--lane nexacro` (default) — Nexacro UIAdapter 기반 산출 (`NexacroBase` extends, `NexacroResult` 반환, `.do` 엔드포인트). 자세한 컨트랙트는 `references/nexacro-uiadapter-spec.md`.
+- `--lane vanilla` — 의존성 없는 순수 Spring + MyBatis 산출 (`@RestController`, REST 엔드포인트, POJO entity). `references/vanilla-spec.md`.
+
 See `references/` for the input contract, output layout, and uiadapter spec.
