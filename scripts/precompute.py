@@ -14,8 +14,14 @@ def gather_mapper_columns(entity: dict) -> dict:
     }
 
 
-def build_save_branches(entity: dict) -> list:
+def build_save_branches(entity: dict, lane: str = "nexacro") -> list:
     name = entity["name"]
+    if lane == "vanilla":
+        return [
+            {"row_type_value": "I", "mapper_method": f"insert_{name}_map"},
+            {"row_type_value": "U", "mapper_method": f"update_{name}_map"},
+            {"row_type_value": "D", "mapper_method": f"delete_{name}_map"},
+        ]
     return [
         {"row_type_const": "DataSet.ROW_TYPE_INSERTED", "mapper_method": f"insert_{name}_map"},
         {"row_type_const": "DataSet.ROW_TYPE_UPDATED",  "mapper_method": f"update_{name}_map"},
@@ -66,20 +72,23 @@ def build_domain_fields(entity: dict) -> list:
     return out
 
 
-def build_entity_context(entity: dict, base_package: str) -> dict:
+def build_entity_context(entity: dict, base_package: str, lane: str = "nexacro") -> dict:
     name = entity["name"]
     pascal = to_pascal(name)
+    lib_prefix = NEXACRO_LIB_PREFIX if lane == "nexacro" else None
+    endpoint_base = f"/api/{name}" if lane == "vanilla" else f"/{name}"
     return {
         "entity_name": name,
         "pascal": pascal,
         "camel": to_camel(name),
         "table": entity["table"],
         "base_package": base_package,
-        "lib_prefix": NEXACRO_LIB_PREFIX,
+        "lane": lane,
+        "lib_prefix": lib_prefix,
         "mapper_fqcn": f"{base_package}.mapper.{pascal}Mapper",
-        "endpoint_base": f"/{name}",
+        "endpoint_base": endpoint_base,
         "mapper_columns": gather_mapper_columns(entity),
-        "save_branches": build_save_branches(entity),
+        "save_branches": build_save_branches(entity, lane=lane),
         "search_predicates": build_search_predicates(entity),
         "fields": build_domain_fields(entity),
     }
