@@ -86,3 +86,25 @@ def test_compile_dry_run_writes_no_code(tmp_path):
     out = proj / "backend"
     assert (out / "mybatis-report.md").exists()
     assert not (out / "src/main/java/com/nexacro/uiadapter/controller/CustomerController.java").exists()
+
+
+import json
+
+
+def test_compile_dry_run_vanilla_lane(tmp_path):
+    proj = _project_dir(tmp_path)
+    cp = _run_compile(proj, "compile", "--dry-run", "--lane", "vanilla", "--package", "com.example.app")
+    assert cp.returncode == 0, cp.stderr
+    payload = json.loads((proj / "backend" / "endpoints.json").read_text(encoding="utf-8"))
+    assert payload["version"] == 2
+    assert payload["lane"] == "vanilla"
+    assert payload["entities"][0]["endpoint_base"].startswith("/api/")
+
+
+def test_compile_dry_run_default_lane_is_nexacro(tmp_path):
+    proj = _project_dir(tmp_path)
+    cp = _run_compile(proj, "compile", "--dry-run")
+    assert cp.returncode == 0, cp.stderr
+    payload = json.loads((proj / "backend" / "endpoints.json").read_text(encoding="utf-8"))
+    assert payload["version"] == 1
+    assert "lane" not in payload
