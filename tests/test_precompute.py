@@ -84,3 +84,21 @@ def test_build_entity_context_shape():
     assert ctx["save_branches"][0]["mapper_method"] == "insert_customer_map"
     assert ctx["search_predicates"][0].startswith('<if test="CUSTOMER_ID')
     assert ctx["fields"][0]["field"] == "customerId"
+
+
+def test_build_entity_context_default_is_nexacro():
+    e = {"name": "user", "table": "user", "columns": [{"name": "id", "pk": True, "type": "bigint"}]}
+    ctx = build_entity_context(e, base_package="com.x")
+    assert ctx["lib_prefix"] == "com.nexacro.uiadapter"
+    assert ctx["endpoint_base"] == "/user"
+    assert ctx["save_branches"][0]["row_type_const"] == "DataSet.ROW_TYPE_INSERTED"
+
+
+def test_build_entity_context_vanilla_lane():
+    e = {"name": "user", "table": "user", "columns": [{"name": "id", "pk": True, "type": "bigint"}]}
+    ctx = build_entity_context(e, base_package="com.x", lane="vanilla")
+    assert ctx["lib_prefix"] is None
+    assert ctx["endpoint_base"] == "/api/user"
+    branches = ctx["save_branches"]
+    assert {b["row_type_value"] for b in branches} == {"I", "U", "D"}
+    assert all("mapper_method" in b for b in branches)
