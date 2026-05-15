@@ -40,3 +40,28 @@ def test_build_endpoints_payload_empty_entities():
 def test_build_endpoints_payload_default_context_path():
     payload = build_endpoints_payload([{"name": "x"}])
     assert payload["context_path"] == "/uiadapter"
+
+
+def test_vanilla_payload_shape():
+    entities = [{"name": "order", "table": "TB_ORDER"}]
+    payload = build_endpoints_payload(entities, context_path="/api", lane="vanilla")
+    assert payload["version"] == 2
+    assert payload["lane"] == "vanilla"
+    assert payload["context_path"] == "/api"
+    ent = payload["entities"][0]
+    assert ent["name"] == "order"
+    methods = [ep["method"] for ep in ent["endpoints"]]
+    assert "GET" in methods
+    assert "POST" in methods
+    paths = [ep["http_path"] for ep in ent["endpoints"]]
+    assert "/api/order" in paths
+
+
+def test_nexacro_payload_unchanged():
+    entities = [{"name": "customer", "table": "TB_CUSTOMER"}]
+    payload = build_endpoints_payload(entities, context_path="/uiadapter", lane="nexacro")
+    assert payload["version"] == 1
+    assert "lane" not in payload
+    cust = payload["entities"][0]
+    methods = [ep["method"] for ep in cust["endpoints"]]
+    assert methods == ["select_datalist_map", "save_datalist_map"]
