@@ -1,5 +1,7 @@
 # nexacro uiadapter Spec Summary
 
+> Lane: `nexacro` (default). Vanilla 산출은 `references/vanilla-spec.md` 참조.
+
 References:
 - `spring boot 3.0기반-nexacroN-개발자가이드(v0.3).pdf` p.62–74
 - GitLab: `nexacron/spring-boot/jakarta/uiadapter-jakarta` `BoardController.java`, `BoardServiceImpl.java`
