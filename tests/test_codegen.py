@@ -87,6 +87,22 @@ def test_topo_sort_fk_aware():
     assert names.index("customer") < names.index("address")
 
 
+def test_render_entity_files_vanilla_lane(tmp_path):
+    entity = {
+        "name": "user", "table": "TB_USER",
+        "columns": [{"name": "id", "pk": True, "type": "bigint"}, {"name": "name", "type": "varchar(50)"}],
+    }
+    written = render_entity_files(tmp_path, entity, base_package="com.x.app", lane="vanilla")
+    entity_java = pathlib.Path([p for p in written if p.name == "User.java"][0]).read_text(encoding="utf-8")
+    assert "extends NexacroBase" not in entity_java
+    assert "package com.x.app.domain" in entity_java
+
+    controller_java = pathlib.Path([p for p in written if p.name == "UserController.java"][0]).read_text(encoding="utf-8")
+    assert "@RestController" in controller_java
+    assert "NexacroResult" not in controller_java
+    assert '@RequestMapping("/api/user")' in controller_java
+
+
 from codegen import render_schema_sql
 from ddl_loader import DDLBundle
 from postgres_to_hsqldb import convert_bundle
