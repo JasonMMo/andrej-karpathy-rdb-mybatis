@@ -21,13 +21,19 @@ def _parse_args(argv):
     c.add_argument("--ddl-dir",   default="db/migrations")
     c.add_argument("--seed-dir",  default="db/seed")
     c.add_argument("--out",       default="backend")
-    c.add_argument("--package",   default="com.nexacro.uiadapter")
+    c.add_argument("--lane",      choices=["nexacro", "vanilla"], default="nexacro")
+    c.add_argument("--package",   default=None)
     c.add_argument("--table-prefix", default="TB_")
     c.add_argument("--strict-prefix", action="store_true",
                    help="fail (exit 1) when any entity's table does not start with --table-prefix")
     c.add_argument("--skip-compile", action="store_true")
     c.add_argument("--dry-run",   action="store_true")
-    return p.parse_args(argv)
+    args = p.parse_args(argv)
+    if args.cmd == "compile" and args.package is None:
+        args.package = (
+            "com.nexacro.uiadapter" if args.lane == "nexacro" else "com.example.app"
+        )
+    return args
 
 
 def _check_table_prefix(entities, prefix):
@@ -96,10 +102,15 @@ def main(argv=None):
     if args.dry_run:
         validation.setdefault("R005", "SKIP")
         validation.setdefault("R006", "SKIP")
-        for e in sorted_entities:
-            endpoints.append(f"/{e['name']}/select_datalist_map.do")
-            endpoints.append(f"/{e['name']}/save_datalist_map.do")
-        endpoints_payload = build_endpoints_payload(sorted_entities, context_path="/uiadapter")
+        context_path = "/uiadapter" if args.lane == "nexacro" else "/api"
+        if args.lane == "nexacro":
+            for e in sorted_entities:
+                endpoints.append(f"/{e['name']}/select_datalist_map.do")
+                endpoints.append(f"/{e['name']}/save_datalist_map.do")
+        else:
+            for e in sorted_entities:
+                endpoints.append(f"/api/{e['name']}")
+        endpoints_payload = build_endpoints_payload(sorted_entities, context_path=context_path, lane=args.lane)
         write_endpoints_json(out_root, endpoints_payload)
         generated.append(str(out_root / "endpoints.json"))
         _emit_full_report(args, validation, generated, endpoints, exit_code=0, extra=extra + ["dry-run mode"])
@@ -112,9 +123,12 @@ def main(argv=None):
         generated.append(render_data_sql(out_root, converted_seed))
 
     for e in sorted_entities:
-        generated.extend(render_entity_files(out_root, e, base_package=args.package))
-        endpoints.append(f"/{e['name']}/select_datalist_map.do")
-        endpoints.append(f"/{e['name']}/save_datalist_map.do")
+        generated.extend(render_entity_files(out_root, e, base_package=args.package, lane=args.lane))
+        if args.lane == "nexacro":
+            endpoints.append(f"/{e['name']}/select_datalist_map.do")
+            endpoints.append(f"/{e['name']}/save_datalist_map.do")
+        else:
+            endpoints.append(f"/api/{e['name']}")
 
     exit_code = 0
     try:
@@ -139,7 +153,8 @@ def main(argv=None):
             extra.append("javac stderr:\n" + jr.stderr)
             exit_code = max(exit_code, 2)
 
-    endpoints_payload = build_endpoints_payload(sorted_entities, context_path="/uiadapter")
+    context_path = "/uiadapter" if args.lane == "nexacro" else "/api"
+    endpoints_payload = build_endpoints_payload(sorted_entities, context_path=context_path, lane=args.lane)
     write_endpoints_json(out_root, endpoints_payload)
     generated.append(str(out_root / "endpoints.json"))
     _emit_full_report(args, validation, generated, endpoints, exit_code=exit_code, extra=extra,
