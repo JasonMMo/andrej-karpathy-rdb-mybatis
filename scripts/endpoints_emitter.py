@@ -2,7 +2,7 @@ import json
 import pathlib
 
 
-def build_endpoints_payload(entities, context_path="/uiadapter"):
+def _nexacro_payload(entities, context_path):
     out_entities = []
     for e in entities:
         name = e["name"]
@@ -30,6 +30,39 @@ def build_endpoints_payload(entities, context_path="/uiadapter"):
         "context_path": context_path,
         "entities": out_entities,
     }
+
+
+def _vanilla_payload(entities, context_path):
+    out_entities = []
+    for e in entities:
+        name = e["name"]
+        base = f"{context_path}/{name}"
+        out_entities.append({
+            "name": name,
+            "endpoint_base": base,
+            "endpoints": [
+                {
+                    "method": "GET",
+                    "http_path": base,
+                },
+                {
+                    "method": "POST",
+                    "http_path": base,
+                },
+            ],
+        })
+    return {
+        "version": 2,
+        "lane": "vanilla",
+        "context_path": context_path,
+        "entities": out_entities,
+    }
+
+
+def build_endpoints_payload(entities, context_path="/uiadapter", lane="nexacro"):
+    if lane == "vanilla":
+        return _vanilla_payload(entities, context_path)
+    return _nexacro_payload(entities, context_path)
 
 
 def write_endpoints_json(out_root, payload):
