@@ -29,7 +29,7 @@ def render_entity_files(out_root: pathlib.Path, entity: dict, base_package: str,
     java_root = out_root / "src" / "main" / "java" / pkg_path
     xml_root  = out_root / "src" / "main" / "resources" / "mybatis" / "mapper"
 
-    suffix = ".vanilla" if lane == "vanilla" else ""
+    suffix = "" if lane == "nexacro" else f".{lane}"
 
     written = []
     written.append(_write(java_root / "domain" / f"{ctx['pascal']}.java",
