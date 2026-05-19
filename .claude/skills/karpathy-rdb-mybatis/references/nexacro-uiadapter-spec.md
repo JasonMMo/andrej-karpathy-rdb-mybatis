@@ -7,7 +7,7 @@ References:
 - GitLab: `nexacron/spring-boot/jakarta/uiadapter-jakarta` `BoardController.java`, `BoardServiceImpl.java`
 
 ## Mandatory imports (per layer) — JDK17 jakarta
-- Controller: `com.nexacro.uiadapter.jakarta.core.data.{NexacroResult, ParamDataSet}`, `com.nexacro.uiadapter.jakarta.core.NexacroException`
+- Controller: `com.nexacro.uiadapter.jakarta.core.data.NexacroResult`, `com.nexacro.uiadapter.jakarta.core.annotation.ParamDataSet`, `com.nexacro.uiadapter.jakarta.core.NexacroException`
 - ServiceImpl: `com.nexacro.java.xapi.data.DataSet`, `com.nexacro.uiadapter.jakarta.core.data.DataSetRowTypeAccessor`, `org.mybatis.spring.SqlSessionTemplate`
 - Domain: `com.nexacro.uiadapter.jakarta.core.data.NexacroBase`
 
