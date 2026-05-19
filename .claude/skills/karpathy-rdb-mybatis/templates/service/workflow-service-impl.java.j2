@@ -1,0 +1,68 @@
+package {{ base_package }}.service.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import {{ base_package }}.mapper.{{ pascal }}Mapper;
+import {{ base_package }}.service.{{ pascal }}WorkflowService;
+
+/**
+ * State machine guard for {{ entity_name }}.{{ workflow.status_column }}.
+ * Generated from seed `workflow:` block — manual edits will be lost on regen.
+ *
+ * States: {{ workflow.states|join(", ") }}
+ */
+@Service("{{ camel }}WorkflowService")
+public class {{ pascal }}WorkflowServiceImpl implements {{ pascal }}WorkflowService {
+
+{% for state in workflow.states %}
+    public static final String STATE_{{ state }} = "{{ state }}";
+{% endfor %}
+
+    @Autowired
+    private SqlSessionTemplate sqlSession;
+
+{% for t in workflow.transitions %}
+    private static final Set<String> ALLOWED_FROM_{{ t.action|upper }} = Set.of(
+{%- for s in t.from_states %}"{{ s }}"{% if not loop.last %}, {% endif %}{% endfor -%}
+    );
+
+    @Override
+    @Transactional
+    public int {{ t.action }}_{{ entity_name }}(Long id, Long actorId, Map<String, Object> payload) {
+        {{ pascal }}Mapper mapper = sqlSession.getMapper({{ pascal }}Mapper.class);
+        Map<String, Object> row = mapper.select_{{ entity_name }}_by_id(id);
+        if (row == null) {
+            throw new IllegalStateException("{{ entity_name }} not found: id=" + id);
+        }
+        String current = String.valueOf(row.get("{{ workflow.status_column_upper }}"));
+        if (!ALLOWED_FROM_{{ t.action|upper }}.contains(current)) {
+            throw new IllegalStateException(
+                "{{ entity_name }} id=" + id + " cannot `{{ t.action }}` from state=" + current
+                + " (allowed: " + ALLOWED_FROM_{{ t.action|upper }} + ")");
+        }
+        Map<String, Object> params = new HashMap<>();
+        params.put("ID", id);
+        params.put("NEW_STATUS", "{{ t.to_state }}");
+        params.put("ACTOR_ID", actorId);
+        if (payload != null) params.putAll(payload);
+        return mapper.update_{{ entity_name }}_status(params);
+    }
+
+{% endfor %}
+    @Override
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> list_{{ entity_name }}_by_status(String status) {
+        {{ pascal }}Mapper mapper = sqlSession.getMapper({{ pascal }}Mapper.class);
+        Map<String, String> q = new HashMap<>();
+        q.put("{{ workflow.status_column_upper }}", status);
+        return mapper.select_{{ entity_name }}_datalist_map(q);
+    }
+}
