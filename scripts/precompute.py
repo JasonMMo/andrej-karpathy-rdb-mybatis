@@ -79,6 +79,30 @@ def build_domain_fields(entity: dict) -> list:
     return out
 
 
+def build_workflow(entity: dict) -> dict | None:
+    wf = entity.get("workflow")
+    if not wf:
+        return None
+    status_col = wf.get("status_column", "status")
+    states = list(wf.get("states") or [])
+    transitions = []
+    for t in wf.get("transitions") or []:
+        from_raw = t.get("from")
+        from_list = list(from_raw) if isinstance(from_raw, list) else [from_raw]
+        transitions.append({
+            "action": t["action"],
+            "action_pascal": to_pascal(t["action"]),
+            "from_states": from_list,
+            "to_state": t["to"],
+        })
+    return {
+        "status_column": status_col,
+        "status_column_upper": to_upper_snake(status_col),
+        "states": states,
+        "transitions": transitions,
+    }
+
+
 def build_entity_context(
     entity: dict,
     base_package: str,
@@ -113,4 +137,5 @@ def build_entity_context(
         "save_branches": build_save_branches(entity, lane=lane),
         "search_predicates": build_search_predicates(entity),
         "fields": build_domain_fields(entity),
+        "workflow": build_workflow(entity),
     }
