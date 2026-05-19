@@ -55,6 +55,13 @@ def render_entity_files(
                           env.get_template(f"service/service-impl{suffix}.java.j2").render(**ctx)))
     written.append(_write(java_root / "controller" / f"{ctx['pascal']}Controller.java",
                           env.get_template(f"controller/controller{suffix}.java.j2").render(**ctx)))
+
+    if ctx.get("workflow"):
+        written.append(_write(java_root / "service" / f"{ctx['pascal']}WorkflowService.java",
+                              env.get_template("service/workflow-service-interface.java.j2").render(**ctx)))
+        written.append(_write(java_root / "service" / "impl" / f"{ctx['pascal']}WorkflowServiceImpl.java",
+                              env.get_template("service/workflow-service-impl.java.j2").render(**ctx)))
+
     return written
 
 
