@@ -1,6 +1,8 @@
 package {{ base_package }}.domain;
+{% if nexacro_base_needs_import %}
 
-import {{ lib_prefix }}.jakarta.core.data.NexacroBase;
+import {{ nexacro_base_fqcn }};
+{% endif %}
 
 public class {{ pascal }} extends NexacroBase {
 
