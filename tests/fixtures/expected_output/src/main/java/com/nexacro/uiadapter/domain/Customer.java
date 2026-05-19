@@ -1,7 +1,5 @@
 package com.nexacro.uiadapter.domain;
 
-import com.nexacro.uiadapter.jakarta.core.data.NexacroBase;
-
 public class Customer extends NexacroBase {
 
 
