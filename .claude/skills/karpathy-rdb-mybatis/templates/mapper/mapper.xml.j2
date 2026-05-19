@@ -29,4 +29,18 @@
     DELETE FROM {{ table }} WHERE {% for c in mapper_columns.pk_upper %}{{ c }} = #{{ '{' }}{{ c }}{{ '}' }}{% if not loop.last %} AND {% endif %}{% endfor %}
   </delete>
 
+{% if workflow %}
+  <select id="select_{{ entity_name }}_by_id" parameterType="long" resultType="java.util.Map">
+    SELECT {{ mapper_columns.all_upper | join(", ") }}
+      FROM {{ table }}
+     WHERE {% for c in mapper_columns.pk_upper %}{{ c }} = #{{ '{' }}{{ c }}{{ '}' }}{% if not loop.last %} AND {% endif %}{% endfor %}
+  </select>
+
+  <update id="update_{{ entity_name }}_status" parameterType="java.util.Map">
+    UPDATE {{ table }}
+       SET {{ workflow.status_column_upper }} = #{NEW_STATUS}
+     WHERE {% for c in mapper_columns.pk_upper %}{{ c }} = #{{ '{' }}{{ c }}{{ '}' }}{% if not loop.last %} AND {% endif %}{% endfor %}
+  </update>
+{% endif %}
+
 </mapper>
