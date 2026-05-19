@@ -79,19 +79,34 @@ def build_domain_fields(entity: dict) -> list:
     return out
 
 
-def build_entity_context(entity: dict, base_package: str, lane: str = "nexacro") -> dict:
+def build_entity_context(
+    entity: dict,
+    base_package: str,
+    lane: str = "nexacro",
+    project_root_pkg: str | None = None,
+) -> dict:
     name = entity["name"]
     pascal = to_pascal(name)
     lib_prefix = NEXACRO_LIB_PREFIX if lane == "nexacro" else None
     endpoint_base = f"/{name}" if lane == "nexacro" else f"/api/{name}"
+    # NexacroBase lives at {project_root_pkg}.domain.NexacroBase (project-local,
+    # not in the library JAR). Default project_root_pkg = base_package, meaning
+    # generated POJOs live in the same package as NexacroBase and need no import.
+    if project_root_pkg is None:
+        project_root_pkg = base_package
+    nexacro_base_fqcn = f"{project_root_pkg}.domain.NexacroBase"
+    nexacro_base_needs_import = nexacro_base_fqcn != f"{base_package}.domain.NexacroBase"
     return {
         "entity_name": name,
         "pascal": pascal,
         "camel": to_camel(name),
         "table": entity["table"],
         "base_package": base_package,
+        "project_root_pkg": project_root_pkg,
         "lane": lane,
         "lib_prefix": lib_prefix,
+        "nexacro_base_fqcn": nexacro_base_fqcn,
+        "nexacro_base_needs_import": nexacro_base_needs_import,
         "mapper_fqcn": f"{base_package}.mapper.{pascal}Mapper",
         "endpoint_base": endpoint_base,
         "mapper_columns": gather_mapper_columns(entity),
