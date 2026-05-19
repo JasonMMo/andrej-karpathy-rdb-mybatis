@@ -23,6 +23,10 @@ def _parse_args(argv):
     c.add_argument("--out",       default="backend")
     c.add_argument("--lane",      choices=["nexacro", "vanilla", "jakarta", "javax"], default="nexacro")
     c.add_argument("--package",   default=None)
+    c.add_argument("--project-root-pkg", default=None,
+                   help="Java package where project-local NexacroBase lives "
+                        "(default: same as --package). Used to compute the "
+                        "NexacroBase import when generated code is in a sub-package.")
     c.add_argument("--table-prefix", default="TB_")
     c.add_argument("--strict-prefix", action="store_true",
                    help="fail (exit 1) when any entity's table does not start with --table-prefix")
@@ -123,7 +127,12 @@ def main(argv=None):
         generated.append(render_data_sql(out_root, converted_seed))
 
     for e in sorted_entities:
-        generated.extend(render_entity_files(out_root, e, base_package=args.package, lane=args.lane))
+        generated.extend(render_entity_files(
+            out_root, e,
+            base_package=args.package,
+            lane=args.lane,
+            project_root_pkg=args.project_root_pkg,
+        ))
         if args.lane == "nexacro":
             endpoints.append(f"/{e['name']}/select_datalist_map.do")
             endpoints.append(f"/{e['name']}/save_datalist_map.do")
