@@ -1,0 +1,33 @@
+package {{ base_package }}.service.impl;
+
+import java.util.List;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import {{ base_package }}.mapper.{{ pascal }}Mapper;
+import {{ base_package }}.service.{{ pascal }}Service;
+
+@Service
+public class {{ pascal }}ServiceImpl implements {{ pascal }}Service {
+
+    @Autowired
+    private {{ pascal }}Mapper mapper;
+
+    @Override
+    public List<Map<String, Object>> select_{{ entity_name }}_datalist_map(Map<String, Object> params) {
+        return mapper.select_{{ entity_name }}_datalist_map(params);
+    }
+
+    @Override
+    public int save_{{ entity_name }}_datalist_map(List<Map<String, Object>> rows) {
+        int n = 0;
+        for (Map<String, Object> row : rows) {
+            String rowType = String.valueOf(row.getOrDefault("_rowType", ""));
+{% for b in save_branches %}
+            {% if loop.first %}if{% else %}else if{% endif %} ("{{ b.row_type_value }}".equals(rowType)) { n += mapper.{{ b.mapper_method }}(row); }
+{% endfor %}
+        }
+        return n;
+    }
+}
