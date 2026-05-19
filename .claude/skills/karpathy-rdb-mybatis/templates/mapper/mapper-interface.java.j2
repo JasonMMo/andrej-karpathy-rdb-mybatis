@@ -8,4 +8,8 @@ public interface {{ pascal }}Mapper {
     void insert_{{ entity_name }}_map(Map<String, Object> {{ entity_name }});
     void update_{{ entity_name }}_map(Map<String, Object> {{ entity_name }});
     void delete_{{ entity_name }}_map(Map<String, Object> {{ entity_name }});
+{% if workflow %}
+    Map<String, Object> select_{{ entity_name }}_by_id(Long id);
+    int update_{{ entity_name }}_status(Map<String, Object> params);
+{% endif %}
 }
