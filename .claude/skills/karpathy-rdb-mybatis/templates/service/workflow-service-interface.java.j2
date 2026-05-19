@@ -1,0 +1,14 @@
+package {{ base_package }}.service;
+
+import java.util.List;
+import java.util.Map;
+
+public interface {{ pascal }}WorkflowService {
+
+{% for t in workflow.transitions %}
+    /** Transition {{ entity_name }} via action `{{ t.action }}` ({{ t.from_states|join("/") }} → {{ t.to_state }}). */
+    int {{ t.action }}_{{ entity_name }}(Long id, Long actorId, Map<String, Object> payload);
+
+{% endfor %}
+    List<Map<String, Object>> list_{{ entity_name }}_by_status(String status);
+}
