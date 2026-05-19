@@ -21,7 +21,7 @@ def _parse_args(argv):
     c.add_argument("--ddl-dir",   default="db/migrations")
     c.add_argument("--seed-dir",  default="db/seed")
     c.add_argument("--out",       default="backend")
-    c.add_argument("--lane",      choices=["nexacro", "vanilla"], default="nexacro")
+    c.add_argument("--lane",      choices=["nexacro", "vanilla", "jakarta", "javax"], default="nexacro")
     c.add_argument("--package",   default=None)
     c.add_argument("--table-prefix", default="TB_")
     c.add_argument("--strict-prefix", action="store_true",
