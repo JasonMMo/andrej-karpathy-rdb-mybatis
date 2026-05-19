@@ -1,0 +1,27 @@
+package {{ base_package }}.domain;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
+@Entity
+@Table(name = "{{ table }}")
+public class {{ pascal }} {
+{% for f in fields %}
+{%- if f.is_search %}
+    @Transient
+    private {{ f.java_type }} {{ f.field }};
+{%- else %}
+    {% if f.is_pk %}@Id
+    {% endif %}@Column(name = "{{ f.column }}")
+    private {{ f.java_type }} {{ f.field }};
+{%- endif %}
+{% endfor %}
+
+{% for f in fields %}
+    public {{ f.java_type }} {{ f.getter }}() { return {{ f.field }}; }
+    public void {{ f.setter }}({{ f.java_type }} v) { this.{{ f.field }} = v; }
+{% endfor %}
+}
