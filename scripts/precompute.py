@@ -16,7 +16,7 @@ def gather_mapper_columns(entity: dict) -> dict:
 
 def build_save_branches(entity: dict, lane: str = "nexacro") -> list:
     name = entity["name"]
-    if lane == "vanilla":
+    if lane in ("vanilla", "jakarta", "javax"):
         return [
             {"row_type_value": "I", "mapper_method": f"insert_{name}_map"},
             {"row_type_value": "U", "mapper_method": f"update_{name}_map"},
@@ -64,11 +64,18 @@ def build_domain_fields(entity: dict) -> list:
         field = to_camel(c["name"])
         jt = _java_type_for(c.get("type"))
         cap = field[0].upper() + field[1:]
-        out.append({"field": field, "java_type": jt, "getter": f"get{cap}", "setter": f"set{cap}"})
+        out.append({
+            "field": field, "java_type": jt,
+            "getter": f"get{cap}", "setter": f"set{cap}",
+            "column": c["name"], "is_pk": bool(c.get("pk")), "is_search": False,
+        })
     for sf in _SEARCH_FIELDS:
         cap = sf["field"][0].upper() + sf["field"][1:]
-        out.append({"field": sf["field"], "java_type": sf["java_type"],
-                    "getter": f"get{cap}", "setter": f"set{cap}"})
+        out.append({
+            "field": sf["field"], "java_type": sf["java_type"],
+            "getter": f"get{cap}", "setter": f"set{cap}",
+            "column": sf["field"], "is_pk": False, "is_search": True,
+        })
     return out
 
 
@@ -76,7 +83,7 @@ def build_entity_context(entity: dict, base_package: str, lane: str = "nexacro")
     name = entity["name"]
     pascal = to_pascal(name)
     lib_prefix = NEXACRO_LIB_PREFIX if lane == "nexacro" else None
-    endpoint_base = f"/api/{name}" if lane == "vanilla" else f"/{name}"
+    endpoint_base = f"/{name}" if lane == "nexacro" else f"/api/{name}"
     return {
         "entity_name": name,
         "pascal": pascal,
