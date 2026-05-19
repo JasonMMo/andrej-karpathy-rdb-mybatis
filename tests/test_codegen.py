@@ -41,8 +41,12 @@ def test_mapper_xml_namespace_matches_interface(tmp_path):
 
 
 def test_nexacro_lib_prefix_independent_of_base_package(tmp_path):
-    """When --package is a custom value, NexacroN library imports must still
-    point at com.nexacro.uiadapter.jakarta.core (the fixed library prefix)."""
+    """When --package is a custom value, NexacroN *library* imports must still
+    point at com.nexacro.uiadapter.jakarta.core (the fixed library prefix).
+    NexacroBase is project-local (not in the library JAR), so it lives at
+    {project_root_pkg}.domain.NexacroBase. When project_root_pkg defaults to
+    base_package, generated POJOs sit in the same package as NexacroBase and
+    need NO import."""
     out = tmp_path / "backend"
     render_entity_files(out, ENTITY, base_package="com.mycompany.app")
     java_root = out / "src/main/java/com/mycompany/app"
@@ -53,11 +57,29 @@ def test_nexacro_lib_prefix_independent_of_base_package(tmp_path):
     assert "import com.nexacro.uiadapter.jakarta.core.data.NexacroResult;" in ctrl
     assert "import com.nexacro.uiadapter.jakarta.core.NexacroException;" in ctrl
     assert "import com.nexacro.uiadapter.jakarta.core.data.DataSetRowTypeAccessor;" in impl
-    assert "import com.nexacro.uiadapter.jakarta.core.data.NexacroBase;" in domain
+    # NexacroBase is project-local and lives in same package as Customer → no import
+    assert "import" not in domain.split("public class")[0].split("package")[1]
+    assert "extends NexacroBase" in domain
     # project types use the custom base package
     assert "package com.mycompany.app.controller;" in ctrl
     assert "import com.mycompany.app.service.CustomerService;" in ctrl
     assert "import com.mycompany.app.mapper.CustomerMapper;" in impl
+
+
+def test_nexacro_base_import_when_in_subpackage(tmp_path):
+    """When generated POJOs live in a sub-package (e.g. base_package=
+    com.nexacro.uiadapter.customer with project_root_pkg=com.nexacro.uiadapter),
+    NexacroBase must be explicitly imported from {project_root_pkg}.domain."""
+    out = tmp_path / "backend"
+    render_entity_files(
+        out, ENTITY,
+        base_package="com.nexacro.uiadapter.customer",
+        project_root_pkg="com.nexacro.uiadapter",
+    )
+    domain = (out / "src/main/java/com/nexacro/uiadapter/customer/domain/Customer.java").read_text(encoding="utf-8")
+    assert "package com.nexacro.uiadapter.customer.domain;" in domain
+    assert "import com.nexacro.uiadapter.domain.NexacroBase;" in domain
+    assert "extends NexacroBase" in domain
 
 
 def test_service_impl_has_three_branches(tmp_path):
