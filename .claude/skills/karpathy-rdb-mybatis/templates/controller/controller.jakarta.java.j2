@@ -1,0 +1,31 @@
+package {{ base_package }}.controller;
+
+import java.util.List;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import {{ base_package }}.service.{{ pascal }}Service;
+
+@RestController
+@RequestMapping("{{ endpoint_base }}")
+public class {{ pascal }}Controller {
+
+    @Autowired
+    private {{ pascal }}Service service;
+
+    @GetMapping
+    public List<Map<String, Object>> select(@RequestParam Map<String, Object> params) {
+        return service.select_{{ entity_name }}_datalist_map(params);
+    }
+
+    @PostMapping
+    public int save(@RequestBody List<Map<String, Object>> rows) {
+        return service.save_{{ entity_name }}_datalist_map(rows);
+    }
+}
