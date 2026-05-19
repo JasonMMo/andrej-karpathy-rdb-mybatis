@@ -20,9 +20,20 @@ def _write(path: pathlib.Path, content: str) -> pathlib.Path:
     return path
 
 
-def render_entity_files(out_root: pathlib.Path, entity: dict, base_package: str, lane: str = "nexacro") -> list:
+def render_entity_files(
+    out_root: pathlib.Path,
+    entity: dict,
+    base_package: str,
+    lane: str = "nexacro",
+    project_root_pkg: str | None = None,
+) -> list:
     out_root = pathlib.Path(out_root)
-    ctx = build_entity_context(entity, base_package=base_package, lane=lane)
+    ctx = build_entity_context(
+        entity,
+        base_package=base_package,
+        lane=lane,
+        project_root_pkg=project_root_pkg,
+    )
     env = _env()
 
     pkg_path = base_package.replace(".", "/")
