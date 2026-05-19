@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.nexacro.uiadapter.jakarta.core.data.NexacroResult;
-import com.nexacro.uiadapter.jakarta.core.data.ParamDataSet;
+import com.nexacro.uiadapter.jakarta.core.annotation.ParamDataSet;
 import com.nexacro.uiadapter.jakarta.core.NexacroException;
 import com.nexacro.uiadapter.service.AddressService;
 
