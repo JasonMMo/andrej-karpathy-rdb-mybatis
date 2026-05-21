@@ -84,6 +84,15 @@ def test_jakarta_mapper_interface_int_crud(tmp_path):
     assert "void insert_" not in mapper
 
 
+def test_jakarta_mapper_interface_has_mapper_annotation(tmp_path):
+    """Growth-33 followup F — runner registers mapper beans via @Mapper
+    annotation auto-discovery (no @MapperScan)."""
+    _render(tmp_path)
+    mapper = (tmp_path / "src/main/java/com/x/app/mapper/CustomerMapper.java").read_text(encoding="utf-8")
+    assert "import org.apache.ibatis.annotations.Mapper;" in mapper
+    assert "@Mapper" in mapper
+
+
 def test_nexacro_lane_interfaces_unchanged(tmp_path):
     """Sanity: nexacro lane must keep its DataSet contract (Map<String,String>+void)."""
     render_entity_files(tmp_path, ENTITY, base_package="com.x.app", lane="nexacro")
