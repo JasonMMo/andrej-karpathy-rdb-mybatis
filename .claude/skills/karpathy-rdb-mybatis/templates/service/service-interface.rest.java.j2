@@ -1,0 +1,9 @@
+package {{ base_package }}.service;
+
+import java.util.List;
+import java.util.Map;
+
+public interface {{ pascal }}Service {
+    List<Map<String, Object>> select_{{ entity_name }}_datalist_map(Map<String, Object> params);
+    int save_{{ entity_name }}_datalist_map(List<Map<String, Object>> rows);
+}
