@@ -41,16 +41,20 @@ def render_entity_files(
     xml_root  = out_root / "src" / "main" / "resources" / "mybatis" / "mapper"
 
     suffix = "" if lane == "nexacro" else f".{lane}"
+    # Interface contracts (service+mapper) differ only between Nexacro (DataSet/`void`)
+    # and the REST family (Map<String,Object>/`int`). vanilla, jakarta, javax share the
+    # REST contract — one template, no per-lane duplication. (Growth-32 followup C/D.)
+    iface_suffix = "" if lane == "nexacro" else ".rest"
 
     written = []
     written.append(_write(java_root / "domain" / f"{ctx['pascal']}.java",
                           env.get_template(f"domain/entity{suffix}.java.j2").render(**ctx)))
     written.append(_write(java_root / "mapper" / f"{ctx['pascal']}Mapper.java",
-                          env.get_template("mapper/mapper-interface.java.j2").render(**ctx)))
+                          env.get_template(f"mapper/mapper-interface{iface_suffix}.java.j2").render(**ctx)))
     written.append(_write(xml_root / f"{ctx['pascal']}Mapper.xml",
                           env.get_template("mapper/mapper.xml.j2").render(**ctx)))
     written.append(_write(java_root / "service" / f"{ctx['pascal']}Service.java",
-                          env.get_template("service/service-interface.java.j2").render(**ctx)))
+                          env.get_template(f"service/service-interface{iface_suffix}.java.j2").render(**ctx)))
     written.append(_write(java_root / "service" / "impl" / f"{ctx['pascal']}ServiceImpl.java",
                           env.get_template(f"service/service-impl{suffix}.java.j2").render(**ctx)))
     written.append(_write(java_root / "controller" / f"{ctx['pascal']}Controller.java",
