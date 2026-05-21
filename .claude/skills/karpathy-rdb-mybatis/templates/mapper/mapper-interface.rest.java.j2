@@ -1,0 +1,15 @@
+package {{ base_package }}.mapper;
+
+import java.util.List;
+import java.util.Map;
+
+public interface {{ pascal }}Mapper {
+    List<Map<String, Object>> select_{{ entity_name }}_datalist_map(Map<String, Object> params);
+    int insert_{{ entity_name }}_map(Map<String, Object> {{ entity_name }});
+    int update_{{ entity_name }}_map(Map<String, Object> {{ entity_name }});
+    int delete_{{ entity_name }}_map(Map<String, Object> {{ entity_name }});
+{% if workflow %}
+    Map<String, Object> select_{{ entity_name }}_by_id(Long id);
+    int update_{{ entity_name }}_status(Map<String, Object> params);
+{% endif %}
+}
