@@ -87,3 +87,13 @@ def test_javax_mapper_interface_int_crud(tmp_path):
     assert "void insert_" not in mapper
     assert "void update_" not in mapper
     assert "void delete_" not in mapper
+
+
+def test_javax_mapper_interface_has_mapper_annotation(tmp_path):
+    """Growth-33 followup F — runner registers mapper beans via @Mapper
+    annotation auto-discovery (no @MapperScan). Without @Mapper the Spring
+    context fails: NoSuchBeanDefinitionException at autowire time."""
+    _render(tmp_path)
+    mapper = (tmp_path / "src/main/java/com/x/app/mapper/CustomerMapper.java").read_text(encoding="utf-8")
+    assert "import org.apache.ibatis.annotations.Mapper;" in mapper
+    assert "@Mapper" in mapper
