@@ -3,6 +3,9 @@ package {{ base_package }}.mapper;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
 public interface {{ pascal }}Mapper {
     List<Map<String, Object>> select_{{ entity_name }}_datalist_map(Map<String, Object> params);
     int insert_{{ entity_name }}_map(Map<String, Object> {{ entity_name }});
