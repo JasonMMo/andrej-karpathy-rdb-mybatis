@@ -109,6 +109,44 @@ def test_topo_sort_fk_aware():
     assert names.index("customer") < names.index("address")
 
 
+def test_uia_namespace_spring_emits_spring_core_imports(tmp_path):
+    """Growth-47 (T-NexacroUiaPkg-javax): when uia_namespace='spring', controller
+    + serviceImpl must import from com.nexacro.uiadapter.spring.core.* instead of
+    .jakarta.core.* — the Spring 5 / javax.servlet flavor for boot-jdk8-javax."""
+    out = tmp_path / "backend"
+    render_entity_files(out, ENTITY, base_package="com.nexacro.uiadapter",
+                        uia_namespace="spring")
+    ctrl = (out / "src/main/java/com/nexacro/uiadapter/controller/CustomerController.java").read_text(encoding="utf-8")
+    impl = (out / "src/main/java/com/nexacro/uiadapter/service/impl/CustomerServiceImpl.java").read_text(encoding="utf-8")
+    # spring flavor present
+    assert "import com.nexacro.uiadapter.spring.core.data.NexacroResult;" in ctrl
+    assert "import com.nexacro.uiadapter.spring.core.annotation.ParamDataSet;" in ctrl
+    assert "import com.nexacro.uiadapter.spring.core.NexacroException;" in ctrl
+    assert "import com.nexacro.uiadapter.spring.core.data.DataSetRowTypeAccessor;" in impl
+    # jakarta flavor absent (no cross-contamination)
+    assert ".jakarta.core." not in ctrl
+    assert ".jakarta.core." not in impl
+
+
+def test_uia_namespace_default_remains_jakarta(tmp_path):
+    """Default behavior unchanged after Growth-47: omitting uia_namespace keeps
+    the jakarta.core import path (regression guard for prior 87-test suite)."""
+    out = tmp_path / "backend"
+    render_entity_files(out, ENTITY, base_package="com.nexacro.uiadapter")
+    ctrl = (out / "src/main/java/com/nexacro/uiadapter/controller/CustomerController.java").read_text(encoding="utf-8")
+    assert "import com.nexacro.uiadapter.jakarta.core.data.NexacroResult;" in ctrl
+    assert ".spring.core." not in ctrl
+
+
+def test_uia_namespace_rejects_invalid_value(tmp_path):
+    """Defensive: invalid uia_namespace raises ValueError, no silent fallback."""
+    import pytest
+    out = tmp_path / "backend"
+    with pytest.raises(ValueError, match="uia_namespace"):
+        render_entity_files(out, ENTITY, base_package="com.nexacro.uiadapter",
+                            uia_namespace="bogus")
+
+
 def test_render_entity_files_vanilla_lane(tmp_path):
     entity = {
         "name": "user", "table": "TB_USER",
