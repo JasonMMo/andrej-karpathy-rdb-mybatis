@@ -9,28 +9,30 @@
       FROM TB_ADDRESS
      WHERE 1=1
 
-    <if test="ADDRESS_ID != null and ADDRESS_ID != ''"> AND ADDRESS_ID = #{ADDRESS_ID}</if>
+    <if test="address_id != null and address_id != ''"> AND ADDRESS_ID = #{address_id}</if>
 
-    <if test="CUSTOMER_ID != null and CUSTOMER_ID != ''"> AND CUSTOMER_ID = #{CUSTOMER_ID}</if>
+    <if test="customer_id != null and customer_id != ''"> AND CUSTOMER_ID = #{customer_id}</if>
 
-    <if test="LINE1 != null and LINE1 != ''"> AND LINE1 = #{LINE1}</if>
+    <if test="line1 != null and line1 != ''"> AND LINE1 = #{line1}</if>
 
   </select>
 
   <insert id="insert_address_map" parameterType="java.util.Map">
     INSERT INTO TB_ADDRESS (ADDRESS_ID, CUSTOMER_ID, LINE1)
-    VALUES (#{ADDRESS_ID}, #{CUSTOMER_ID}, #{LINE1})
+    VALUES (#{address_id}, #{customer_id}, #{line1})
   </insert>
 
   <update id="update_address_map" parameterType="java.util.Map">
     UPDATE TB_ADDRESS
-       SET CUSTOMER_ID = #{CUSTOMER_ID},
-           LINE1 = #{LINE1}
-     WHERE ADDRESS_ID = #{ADDRESS_ID}
+       SET CUSTOMER_ID = #{customer_id},
+           LINE1 = #{line1}
+     WHERE ADDRESS_ID = #{address_id}
   </update>
 
   <delete id="delete_address_map" parameterType="java.util.Map">
-    DELETE FROM TB_ADDRESS WHERE ADDRESS_ID = #{ADDRESS_ID}
+    DELETE FROM TB_ADDRESS WHERE ADDRESS_ID = #{address_id}
   </delete>
+
+
 
 </mapper>
