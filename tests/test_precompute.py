@@ -38,10 +38,12 @@ def test_build_search_predicates():
         {"name": "email"},
     ]}
     preds = build_search_predicates(entity)
+    # SQL column identifiers uppercase (HSQLDB), test/placeholder keys lowercase
+    # to match envelope Map keys nexacro ships (blueprint snake_case).
     assert preds == [
-        '<if test="CUSTOMER_ID != null and CUSTOMER_ID != \'\'"> AND CUSTOMER_ID = #{CUSTOMER_ID}</if>',
-        '<if test="NAME != null and NAME != \'\'"> AND NAME = #{NAME}</if>',
-        '<if test="EMAIL != null and EMAIL != \'\'"> AND EMAIL = #{EMAIL}</if>',
+        '<if test="customer_id != null and customer_id != \'\'"> AND CUSTOMER_ID = #{customer_id}</if>',
+        '<if test="name != null and name != \'\'"> AND NAME = #{name}</if>',
+        '<if test="email != null and email != \'\'"> AND EMAIL = #{email}</if>',
     ]
 
 
@@ -82,7 +84,7 @@ def test_build_entity_context_shape():
     assert ctx["endpoint_base"] == "/customer"
     assert ctx["mapper_columns"]["pk_upper"] == ["CUSTOMER_ID"]
     assert ctx["save_branches"][0]["mapper_method"] == "insert_customer_map"
-    assert ctx["search_predicates"][0].startswith('<if test="CUSTOMER_ID')
+    assert ctx["search_predicates"][0].startswith('<if test="customer_id')
     assert ctx["fields"][0]["field"] == "customerId"
 
 
