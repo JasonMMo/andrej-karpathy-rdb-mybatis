@@ -114,7 +114,15 @@ def build_entity_context(
     base_package: str,
     lane: str = "nexacro",
     project_root_pkg: str | None = None,
+    uia_namespace: str = "jakarta",
 ) -> dict:
+    # uia_namespace selects the nexacro-uiadapter Spring flavor package segment.
+    # 'jakarta' (default) → com.nexacro.uiadapter.jakarta.core.* (Spring 6 / jakarta.servlet)
+    # 'spring'           → com.nexacro.uiadapter.spring.core.*  (Spring 5 / javax.servlet)
+    # Discovered in Growth-47 (T-NexacroUiaPkg-javax): jakarta-only template breaks
+    # the boot-jdk8-javax runner whose uiadapter lives under .spring.core.
+    if uia_namespace not in ("jakarta", "spring"):
+        raise ValueError(f"uia_namespace must be 'jakarta' or 'spring', got {uia_namespace!r}")
     name = entity["name"]
     pascal = to_pascal(name)
     lib_prefix = NEXACRO_LIB_PREFIX if lane == "nexacro" else None
@@ -135,6 +143,7 @@ def build_entity_context(
         "project_root_pkg": project_root_pkg,
         "lane": lane,
         "lib_prefix": lib_prefix,
+        "uia_namespace": uia_namespace,
         "nexacro_base_fqcn": nexacro_base_fqcn,
         "nexacro_base_needs_import": nexacro_base_needs_import,
         "mapper_fqcn": f"{base_package}.mapper.{pascal}Mapper",
