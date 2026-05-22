@@ -26,6 +26,7 @@ def render_entity_files(
     base_package: str,
     lane: str = "nexacro",
     project_root_pkg: str | None = None,
+    uia_namespace: str = "jakarta",
 ) -> list:
     out_root = pathlib.Path(out_root)
     ctx = build_entity_context(
@@ -33,6 +34,7 @@ def render_entity_files(
         base_package=base_package,
         lane=lane,
         project_root_pkg=project_root_pkg,
+        uia_namespace=uia_namespace,
     )
     env = _env()
 
