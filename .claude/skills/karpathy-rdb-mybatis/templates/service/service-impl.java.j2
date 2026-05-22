@@ -68,9 +68,14 @@ public class {{ pascal }}ServiceImpl implements {{ pascal }}Service {
      * skips the row without throwing.
      */
     private static int resolveRowType(Map<String, Object> row) {
-        Object v = row.get(DataSetRowTypeAccessor.NAME);
+        // Priority: "_RowType_" (canonical wire encoding from XML/JSON/SSV) first,
+        // because PlatformXmlDataDeserializer treats it as a data column and the
+        // framework default-writes DataSetRowType=0 (NORMAL) when no recognized
+        // <Row Type="..."> attribute is present. Only if intent isn't carried in
+        // _RowType_ do we fall back to the converter-populated Integer flag.
+        Object v = row.get("_RowType_");
         if (v == null) {
-            v = row.get("_RowType_");
+            v = row.get(DataSetRowTypeAccessor.NAME);
         }
         if (v instanceof Integer) {
             return (Integer) v;
