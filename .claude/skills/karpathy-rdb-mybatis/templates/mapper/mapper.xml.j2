@@ -15,18 +15,18 @@
 
   <insert id="insert_{{ entity_name }}_map" parameterType="java.util.Map">
     INSERT INTO {{ table }} ({{ mapper_columns.all_upper | join(", ") }})
-    VALUES ({% for c in mapper_columns.all_upper %}#{{ '{' }}{{ c }}{{ '}' }}{% if not loop.last %}, {% endif %}{% endfor %})
+    VALUES ({% for c in mapper_columns.all_lower %}#{{ '{' }}{{ c }}{{ '}' }}{% if not loop.last %}, {% endif %}{% endfor %})
   </insert>
 
   <update id="update_{{ entity_name }}_map" parameterType="java.util.Map">
     UPDATE {{ table }}
-       SET {% for c in mapper_columns.non_pk_upper %}{{ c }} = #{{ '{' }}{{ c }}{{ '}' }}{% if not loop.last %},
+       SET {% for c in mapper_columns.non_pk_upper %}{{ c }} = #{{ '{' }}{{ mapper_columns.non_pk_lower[loop.index0] }}{{ '}' }}{% if not loop.last %},
            {% endif %}{% endfor %}
-     WHERE {% for c in mapper_columns.pk_upper %}{{ c }} = #{{ '{' }}{{ c }}{{ '}' }}{% if not loop.last %} AND {% endif %}{% endfor %}
+     WHERE {% for c in mapper_columns.pk_upper %}{{ c }} = #{{ '{' }}{{ mapper_columns.pk_lower[loop.index0] }}{{ '}' }}{% if not loop.last %} AND {% endif %}{% endfor %}
   </update>
 
   <delete id="delete_{{ entity_name }}_map" parameterType="java.util.Map">
-    DELETE FROM {{ table }} WHERE {% for c in mapper_columns.pk_upper %}{{ c }} = #{{ '{' }}{{ c }}{{ '}' }}{% if not loop.last %} AND {% endif %}{% endfor %}
+    DELETE FROM {{ table }} WHERE {% for c in mapper_columns.pk_upper %}{{ c }} = #{{ '{' }}{{ mapper_columns.pk_lower[loop.index0] }}{{ '}' }}{% if not loop.last %} AND {% endif %}{% endfor %}
   </delete>
 
 {% if workflow %}
