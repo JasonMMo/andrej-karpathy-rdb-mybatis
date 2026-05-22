@@ -10,6 +10,8 @@ def gather_mapper_columns(entity: dict) -> dict:
         "pk_upper":     [to_upper_snake(x["name"]) for x in c["pk"]],
         "non_pk_upper": [to_upper_snake(x["name"]) for x in c["non_pk"]],
         "all_upper":    [to_upper_snake(x["name"]) for x in c["all"]],
+        "pk_lower":     [x["name"] for x in c["pk"]],
+        "non_pk_lower": [x["name"] for x in c["non_pk"]],
         "all_lower":    [x["name"] for x in c["all"]],
     }
 
@@ -30,10 +32,14 @@ def build_save_branches(entity: dict, lane: str = "nexacro") -> list:
 
 
 def build_search_predicates(entity: dict) -> list:
-    cols = gather_mapper_columns(entity)["all_upper"]
+    # SQL column identifiers stay uppercase (HSQLDB normalizes unquoted to upper);
+    # placeholder + test key use the original column name so they match the Map
+    # keys nexacro envelopes ship (lowercase/snake from blueprint, camel from JSON).
+    c = classify(entity)
+    pairs = [(to_upper_snake(x["name"]), x["name"]) for x in c["all"]]
     return [
-        f'<if test="{c} != null and {c} != \'\'"> AND {c} = #{{{c}}}</if>'
-        for c in cols
+        f'<if test="{lower} != null and {lower} != \'\'"> AND {upper} = #{{{lower}}}</if>'
+        for upper, lower in pairs
     ]
 
 
