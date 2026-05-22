@@ -123,7 +123,20 @@ def main(argv=None):
     converted_sql = convert_bundle(ddl)
     generated.append(render_schema_sql(out_root, converted_sql))
     if ddl.seed_files:
-        converted_seed = convert_seed_files(ddl.seed_files)
+        # Reorder seed files by topological entity order so FK parents load first.
+        # Filenames embed entity name (e.g. 01_customer_sample.sql -> 'customer');
+        # files not matching any entity keep alphabetical position at the tail.
+        entity_order = {e["name"]: i for i, e in enumerate(sorted_entities)}
+        def _seed_rank(p):
+            stem = p.stem
+            best = (10_000, stem)
+            for ename, idx in entity_order.items():
+                if ename in stem:
+                    if idx < best[0]:
+                        best = (idx, stem)
+            return best
+        ordered_seed_files = sorted(ddl.seed_files, key=_seed_rank)
+        converted_seed = convert_seed_files(ordered_seed_files)
         generated.append(render_data_sql(out_root, converted_seed))
 
     for e in sorted_entities:
