@@ -31,3 +31,13 @@ Stage 3 of the business-fullstack-creater pipeline.
 - `--lane vanilla` — 의존성 없는 순수 Spring + MyBatis 산출 (`@RestController`, REST 엔드포인트, POJO entity). `references/vanilla-spec.md`.
 
 See `references/` for the input contract, output layout, and uiadapter spec.
+
+## Ownership & Self-Check (Phase A — 2026-05-22)
+
+이 skill 은 **business-fullstack-creater 5축 책임표의 `mybatis (Stage 3)` 축**을 담당. 활동 뷰는 `business-fullstack-creater/learn-log.md` §0.
+
+- **깊이 누적 위치**: `templates/<lane>/` (nexacro/vanilla/jakarta/javax) + `precompute.py` (lane-aware enrichment)
+- **단위 테스트**: `tests/` (pytest)
+- **누적 트랩 (6)**: explicit-id MERGE 패턴 / `@Mapper` bean 어노테이션 진실원천 / typed seed sentinel / REST snake_case URL / MyBatis Map placeholder case = envelope key case / nexacro `_RowType_` 안전추출
+- **미해결 환류**: **G-Jackson** (javax `boot-jdk8-javax` runner Jackson 2.16+ 부재 → `JsonToken.valueDescFor` `NoSuchMethodError`, Growth-33부터 deferred) / **vanilla lane 라이브 검증대 부재** (자체 minimal-servlet runner 미정)
+- **Self-check (Growth 종료 시)**: 새 lane/template/precompute 분기가 발생했다면 `business-fullstack-creater/learn-log.md` §0 mybatis 행 + §3 (패턴) 또는 §4 (트랩) 한 줄 환류했는가?
