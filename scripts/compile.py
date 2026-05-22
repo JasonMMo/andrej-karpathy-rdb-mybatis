@@ -22,6 +22,12 @@ def _parse_args(argv):
     c.add_argument("--seed-dir",  default="db/seed")
     c.add_argument("--out",       default="backend")
     c.add_argument("--lane",      choices=["nexacro", "vanilla", "jakarta", "javax"], default="nexacro")
+    c.add_argument("--uia-namespace", choices=["jakarta", "spring"], default="jakarta",
+                   dest="uia_namespace",
+                   help="Growth-47: nexacro-uiadapter Spring flavor package segment. "
+                        "'jakarta' (default) targets Spring 6 / jakarta.servlet runners "
+                        "(boot-jdk17-jakarta). 'spring' targets Spring 5 / javax.servlet "
+                        "runners (boot-jdk8-javax). Honored only when --lane=nexacro.")
     c.add_argument("--package",   default=None)
     c.add_argument("--project-root-pkg", default=None,
                    help="Java package where project-local NexacroBase lives "
@@ -145,6 +151,7 @@ def main(argv=None):
             base_package=args.package,
             lane=args.lane,
             project_root_pkg=args.project_root_pkg,
+            uia_namespace=args.uia_namespace,
         ))
         if args.lane == "nexacro":
             endpoints.append(f"/{e['name']}/select_datalist_map.do")
