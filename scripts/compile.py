@@ -33,6 +33,12 @@ def _parse_args(argv):
                    help="Java package where project-local NexacroBase lives "
                         "(default: same as --package). Used to compute the "
                         "NexacroBase import when generated code is in a sub-package.")
+    c.add_argument("--url-prefix", default="/uiadapter",
+                   dest="url_prefix",
+                   help="Growth-68: URL context-path prefix for nexacro lane "
+                        "(default: /uiadapter). Override per customer convention "
+                        "(e.g. /api/v1, /services). Reflected in endpoints.json "
+                        "context_path field.")
     c.add_argument("--table-prefix", default="TB_")
     c.add_argument("--strict-prefix", action="store_true",
                    help="fail (exit 1) when any entity's table does not start with --table-prefix")
@@ -112,7 +118,7 @@ def main(argv=None):
     if args.dry_run:
         validation.setdefault("R005", "SKIP")
         validation.setdefault("R006", "SKIP")
-        context_path = "/uiadapter" if args.lane == "nexacro" else "/api"
+        context_path = args.url_prefix if args.lane == "nexacro" else "/api"
         if args.lane == "nexacro":
             for e in sorted_entities:
                 endpoints.append(f"/{e['name']}/select_datalist_map.do")
@@ -182,7 +188,7 @@ def main(argv=None):
             extra.append("javac stderr:\n" + jr.stderr)
             exit_code = max(exit_code, 2)
 
-    context_path = "/uiadapter" if args.lane == "nexacro" else "/api"
+    context_path = args.url_prefix if args.lane == "nexacro" else "/api"
     endpoints_payload = build_endpoints_payload(sorted_entities, context_path=context_path, lane=args.lane)
     write_endpoints_json(out_root, endpoints_payload)
     generated.append(str(out_root / "endpoints.json"))
