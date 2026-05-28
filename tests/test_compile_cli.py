@@ -108,3 +108,44 @@ def test_compile_dry_run_default_lane_is_nexacro(tmp_path):
     payload = json.loads((proj / "backend" / "endpoints.json").read_text(encoding="utf-8"))
     assert payload["version"] == 1
     assert "lane" not in payload
+
+
+# ---------------------------------------------------------------------------
+# Growth-68: --url-prefix flag
+# ---------------------------------------------------------------------------
+
+def test_compile_dry_run_url_prefix_default_is_uiadapter(tmp_path):
+    """Default --url-prefix produces context_path=/uiadapter in endpoints.json."""
+    proj = _project_dir(tmp_path)
+    cp = _run_compile(proj, "compile", "--dry-run")
+    assert cp.returncode == 0, cp.stderr
+    payload = json.loads((proj / "backend" / "endpoints.json").read_text(encoding="utf-8"))
+    assert payload["context_path"] == "/uiadapter"
+
+
+def test_compile_dry_run_url_prefix_override(tmp_path):
+    """--url-prefix /api/v1 produces context_path=/api/v1 in endpoints.json."""
+    proj = _project_dir(tmp_path)
+    cp = _run_compile(proj, "compile", "--dry-run", "--url-prefix", "/api/v1")
+    assert cp.returncode == 0, cp.stderr
+    payload = json.loads((proj / "backend" / "endpoints.json").read_text(encoding="utf-8"))
+    assert payload["context_path"] == "/api/v1"
+
+
+def test_compile_skip_compile_url_prefix_override(tmp_path):
+    """--url-prefix /services produces context_path=/services after full codegen."""
+    proj = _project_dir(tmp_path)
+    cp = _run_compile(proj, "compile", "--skip-compile", "--url-prefix", "/services")
+    assert cp.returncode == 0, cp.stderr
+    payload = json.loads((proj / "backend" / "endpoints.json").read_text(encoding="utf-8"))
+    assert payload["context_path"] == "/services"
+
+
+def test_compile_url_prefix_does_not_affect_vanilla_context_path(tmp_path):
+    """vanilla lane ignores --url-prefix; context_path stays /api."""
+    proj = _project_dir(tmp_path)
+    cp = _run_compile(proj, "compile", "--dry-run", "--lane", "vanilla",
+                      "--package", "com.example.app", "--url-prefix", "/custom")
+    assert cp.returncode == 0, cp.stderr
+    payload = json.loads((proj / "backend" / "endpoints.json").read_text(encoding="utf-8"))
+    assert payload["context_path"] == "/api"
